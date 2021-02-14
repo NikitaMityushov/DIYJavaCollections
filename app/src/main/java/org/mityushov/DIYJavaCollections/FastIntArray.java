@@ -14,7 +14,7 @@ public class FastIntArray implements AutoCloseable {
     private long currentCapacity;
     private final Unsafe unsafe;
     private long address;
-    // private boolean sortedFlag = false;
+    private boolean sortedFlag = false;
 
 // constructors
     public FastIntArray() throws Exception {
@@ -44,6 +44,11 @@ public class FastIntArray implements AutoCloseable {
         long localAddress = this.address + this.sizeOfElementInBytes * (this.size);
         unsafe.putInt(localAddress, element);
         this.size++;
+        // maybe add check if_sorted ??
+        /*
+            if (element < this.get(this.size - 2)) this.sortedFlag = false;
+        */
+        this.sortedFlag = false;
 
     }
 
@@ -88,13 +93,21 @@ public class FastIntArray implements AutoCloseable {
     }
 
     public boolean contains(int element) {
-        return this.returnIndexOfElement(element) != -1;
+        if (this.sortedFlag) {
+            return this.binarySearch(element) != -1;
+        } else {
+            return this.returnIndexOfElement(element) != -1;
+        }
     }
-/*
+
     public void sort() {
-        //
+        if (!this.sortedFlag && this.size > 0) {
+            // this.bubbleSort();
+            this.quickSort(0, this.size - 1);
+            this.sortedFlag = true;
+        }
     }
-*/
+
     @Override
     public void close() {
         this.unsafe.freeMemory(this.address);
@@ -147,18 +160,92 @@ public class FastIntArray implements AutoCloseable {
         return -1;
     }
 
+    private long binarySearch(int element) {
+        long low = 0;
+        long up = this.size - 1;
+        long middle;
+
+        do {
+            middle = low + (up - low) / 2;
+            long midElem = this.get(middle);
+
+            if (element == midElem) {
+                return middle;
+            }
+
+            if (element < midElem) {
+                up = middle - 1;
+            }
+
+            if (element > midElem) {
+                low = middle + 1;
+            }
+
+        } while (low <= up);
+
+            return -1;
+    }
+
+    private void quickSort(long low, long up) {
+
+        if (low >= up) {
+            return;
+        }
+
+        long middle = low + (up - low) / 2;
+        long pivot = this.get(middle);
+
+        long i = low;
+        long j = up;
+
+        while(i <= j) {
+            while(this.get(i) < pivot) {
+                i++;
+            }
+
+            while(this.get(j) > pivot) {
+                j--;
+            }
+
+            if (i <= j) {
+                int tmp = this.get(i);
+                this.setValue(i, this.get(j));
+                this.setValue(j, tmp);
+                i++;
+                j--;
+            }
+        }
+
+        if (low < j) {
+            this.quickSort(low, j);
+        }
+
+        if (up > i) {
+            this.quickSort(i, up);
+        }
+            
+    }
+/*
+    private void bubbleSort() {
+        for (long i = 0; i < size - 1; i++) {
+            for (long j = 0; j < this.size - 1 - i; j++) {
+                if (this.get(j) > this.get(j + 1)) {
+                    int tmp = this.get(j);
+                    this.setValue(j, this.get(j + 1));
+                    this.setValue(j + 1, tmp);
+                }
+            }
+        }
+    }
+*/
+
     private void checkIfOutOfBounds(long index) {
 
         if (index > this.size || index < 0) {
             throw new IndexOutOfBoundsException();
         }
     }
-/*
-    private int binarySearch(int element) {
-        //
-        return 1; // return index of element or -1
-    }
-*/
+
     private boolean checkIfLess75percentLoading() {
         
         if (this.size << 1 < this.currentCapacity >> 1) {
@@ -168,11 +255,16 @@ public class FastIntArray implements AutoCloseable {
         return false;
     }
 
-// temporary
-/*
+    private void setValue(long index, int element) {
+        checkIfOutOfBounds(index);
+        long localAddress = this.address + this.sizeOfElementInBytes * index;
+        unsafe.putInt(localAddress, element);
+    }
+
+    /* for tests
     public long getCurrentCapacity() {
         return this.currentCapacity;
     }
-*/
+    */
 
 }

@@ -2,12 +2,13 @@ package org.mityushov.DIYJavaCollections;
 
 import sun.misc.Unsafe;
 import java.lang.reflect.Constructor;
+// import java.math.BigInteger;
 
 
 public class FastIntArray implements AutoCloseable {
 
     private final long DEFAULT_CAPACITY = 1 << 4; // 16
-    private final long MAX_CAPACITY = 1 << 30;
+    private final long MAX_CAPACITY = 1 << 29;
     private final long SCALING_FACTOR = 1 << 1;
     private final long sizeOfElementInBytes = 1 << 2; // 4
     private long size = 0;
@@ -15,6 +16,7 @@ public class FastIntArray implements AutoCloseable {
     private final Unsafe unsafe;
     private long address;
     private boolean sortedFlag = false;
+    private boolean isFilled = false;
 
 // constructors
     public FastIntArray() throws Exception {
@@ -35,20 +37,26 @@ public class FastIntArray implements AutoCloseable {
     }
 
 // public methods
-    public void add(int element) {
+    public boolean add(int element) {
+        boolean canExtend = true;
 
-        if (this.size == this.currentCapacity) {
-            this.extendArray();
+        if (this.size == this.currentCapacity) { // ! strange ==, why >=
+            canExtend = this.extendArray();
         }
         
-        long localAddress = this.address + this.sizeOfElementInBytes * (this.size);
-        unsafe.putInt(localAddress, element);
-        this.size++;
-        // maybe add check if_sorted ??
-        /*
-            if (element < this.get(this.size - 2)) this.sortedFlag = false;
-        */
-        this.sortedFlag = false;
+        if (canExtend) {
+            long localAddress = this.address + this.sizeOfElementInBytes * (this.size);
+            unsafe.putInt(localAddress, element);
+            this.size++;
+            // maybe add check if_sorted ??
+            /*
+                if (element < this.get(this.size - 2)) this.sortedFlag = false;
+            */
+            this.sortedFlag = false;
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
@@ -131,17 +139,38 @@ public class FastIntArray implements AutoCloseable {
         return this.address + index * this.sizeOfElementInBytes;
     }
 
-    private void extendArray() {
+    private boolean extendArray() {
         //BigInteger??
-        long localCapacity = this.currentCapacity * this.SCALING_FACTOR;
+        if (!isFilled) {
 
-        if (localCapacity >= this.MAX_CAPACITY) {
-            this.currentCapacity = this.MAX_CAPACITY;
-        } else {
-            this.currentCapacity *= this.SCALING_FACTOR;
+            // BigInteger localCapacity = BigInteger.valueOf(this.currentCapacity)
+            //                                             .multiply(BigInteger.valueOf(this.SCALING_FACTOR));
+    
+            // int compareInt = localCapacity.compareTo(BigInteger.valueOf(this.MAX_CAPACITY));
+            long localCapacity = this.currentCapacity * this.SCALING_FACTOR;
+    
+    // перелать!!! ->
+            //if (compareInt == 1 || compareInt == 0) {
+                if (localCapacity >= this.MAX_CAPACITY) {
+                this.currentCapacity = this.MAX_CAPACITY;
+                this.isFilled = true;
+                this.address = unsafe.reallocateMemory(this.address, this.sizeOfElementInBytes * this.currentCapacity);
+            // } else if (compareInt == 0) {
+              //  this.isFilled = true;
+              //  this.currentCapacity = localCapacity.longValue();
+              //  this.address = unsafe.reallocateMemory(this.address, this.sizeOfElementInBytes * this.currentCapacity);
+            } else {
+                // this.currentCapacity = localCapacity.longValue();
+                this.currentCapacity *= this.SCALING_FACTOR;
+                this.address = unsafe.reallocateMemory(this.address, this.sizeOfElementInBytes * this.currentCapacity);
+            }
+    
+            
+            return true;
         }
 
-        this.address = unsafe.reallocateMemory(this.address, this.sizeOfElementInBytes * currentCapacity);
+        return false; 
+        
     }
 
     private void reduceArray() {

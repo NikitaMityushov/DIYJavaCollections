@@ -29,7 +29,9 @@ hs_err_pid*
 build
 
 .vscode
-test
-bin
-App.java
 .idea
+bin
+
+# Files
+ArrayCollection.java
+App.java

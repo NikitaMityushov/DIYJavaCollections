@@ -123,8 +123,51 @@ public class FastIntArray implements AutoCloseable {
 
     @Override
     public String toString() {
-        //
-        return "";
+        // посчитать символы комментариев, вставить в размер билдера!!
+        StringBuilder builder;
+
+        if (this.size < 100) {
+            builder = new StringBuilder((int) this.size);
+            builder.append("[");
+            
+            for (long i = 0; i < this.size; i++) {
+                
+                if (i % 10 == 0) {
+                    builder.append("\n");
+                }
+
+                builder.append(this.get(i) + " ");
+                
+            }
+
+        } else {
+            builder = new StringBuilder(100);
+            builder.append("Size of array is " + this.size + " elements.\nFirst 50 elements:\n[");
+            
+            for (long i = 0; i < 50; i++) {
+                
+                if (i % 10 == 0) {
+                    builder.append("\n");
+                }
+
+                builder.append(this.get(i) + " ");            
+            }
+
+            builder.append("\n]\n...\nLast 50 elements:\n[");
+
+            for (long i = this.size, j = 0; i > this.size - 50; i--, j++) {
+                
+                if (j % 10 == 0) {
+                    builder.append("\n");
+                }
+
+                builder.append(this.get(i) + " ");
+            }
+        }
+
+        builder.append("\n]");
+
+        return builder.toString();
     }
 
 // private methods

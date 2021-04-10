@@ -35,3 +35,5 @@ bin
 # Files
 ArrayCollection.java
 App.java
+.project
+.classpath

@@ -85,7 +85,6 @@ public class LinkedListDIY<E> implements List<E> {
 
     /**
      * remove first object o encountered in the list
-     * @param o
      * @return boolean
      */
     @Override
@@ -233,16 +232,14 @@ public class LinkedListDIY<E> implements List<E> {
         private int index;
         private Node<E> current;
 
-        @SuppressWarnings("unchecked")
         InternalListIterator() {
             this.index = 0;
-            this.current = (Node<E>) LinkedListDIY.this.first;
+            this.current = LinkedListDIY.this.first;
         }
 
-        @SuppressWarnings("unchecked")
         InternalListIterator(int i) {
             this.index = i;
-            Node<E> tmp = (Node<E>) LinkedListDIY.this.first;
+            Node<E> tmp = LinkedListDIY.this.first;
 
             if (LinkedListDIY.this.size <= index || index < 0 || tmp == null) { // ???
                 throw new IndexOutOfBoundsException();
@@ -261,7 +258,6 @@ public class LinkedListDIY<E> implements List<E> {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public E next() {
             var tmp = this.current.item;
             this.current = this.current.next;
@@ -275,7 +271,6 @@ public class LinkedListDIY<E> implements List<E> {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public E previous() {
             var tmp = this.current.item;
             this.current = this.current.prev;
@@ -320,7 +315,6 @@ public class LinkedListDIY<E> implements List<E> {
 
         @Override
         public void add(E element) {
-            var tmp = this.current;
             Node<E> newItem;
             // add first
             if (this.current.prev == null) {

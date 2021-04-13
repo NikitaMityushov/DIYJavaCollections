@@ -2,8 +2,10 @@ package org.mityushov.DIYJavaCollections;
 
 import sun.misc.Unsafe;
 import java.lang.reflect.Constructor;
-// import java.math.BigInteger;
 
+/**
+ *
+ */
 
 public class FastIntArray implements AutoCloseable {
 

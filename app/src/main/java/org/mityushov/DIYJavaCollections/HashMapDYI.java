@@ -1,9 +1,10 @@
 package org.mityushov.DIYJavaCollections;
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+// 16.04.21 tasks
+// 1) keySet()
+// 2) putAll()
+// 3) toString()
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HashMapDYI<K,V> implements Map<K,V> {
     private LinkedList<Entry<K,V>>[] buckets; // list's array
@@ -51,9 +52,15 @@ public class HashMapDYI<K,V> implements Map<K,V> {
             this.value = v;
             return tmp;
         }
+
+        @Override
+        public String toString() {
+            var builder = new StringBuilder();
+            builder.append("[").append(this.getKey()).append(" : ").append(this.getValue()).append("]");
+            return builder.toString();
+        }
     }
-
-
+    // public methods
     @Override
     public int size() {
         return this.size;
@@ -66,32 +73,33 @@ public class HashMapDYI<K,V> implements Map<K,V> {
 
     @Override
     public boolean containsKey(Object o) {
+        int bucket = findEntryIndex(o);
+        if (bucket == -1) {
+            return false;
+        }
+
+        var list = this.buckets[bucket];
+        for (Entry<K, V> tmp : list) {
+            if (tmp.getKey().equals(o)) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
-    public boolean containsValue(Object o) {
-        return false;
+    public boolean containsValue(final Object o) {
+        return this.values().contains(o);
     }
 
     @Override
     public V get(final Object o) {
-        if (o == null) {
+        int bucket = findEntryIndex(o);
+        if (bucket == -1) {
             return null;
         }
-        int bucket = findEntryIndex(o);
         var list = this.buckets[bucket];
-        int indexOfElementInList = -1;
-
-        var listIterator = list.listIterator();
-
-        while (listIterator.hasNext()) {
-            indexOfElementInList = listIterator.nextIndex();
-            var tmp = listIterator.next();
-            if (tmp.getKey().equals(o)) {
-                break;
-            }
-        }
+        int indexOfElementInList = this.getIndexOfKeyInList(list, o);
 
         return indexOfElementInList != -1 ? list.get(indexOfElementInList).getValue() : null;
     }
@@ -99,14 +107,39 @@ public class HashMapDYI<K,V> implements Map<K,V> {
     @Override
     public V put(final K k, final V v) {
         int bucket = this.findEntryIndex(k);
-        this.buckets[bucket].add(new Entry<>(k, v));
-        this.size++;
+        if (bucket == -1) {
+            return null;
+        }
+
+        var list = this.buckets[bucket];
+        int indexOfKeyInList = this.getIndexOfKeyInList(list, k);
+
+        if (indexOfKeyInList == -1) {
+            list.add(new Entry<>(k, v));
+            this.size++;
+        } else {
+            list.get(indexOfKeyInList).setValue(v);
+        }
         return v;
     }
 
     @Override
     public V remove(Object o) {
-        return null;
+        int bucket = this.findEntryIndex(o);
+        if (bucket == -1) {
+            return null;
+        }
+        var list = this.buckets[bucket];
+        int indexOfKeyInList = this.getIndexOfKeyInList(list, o);
+
+        if (indexOfKeyInList == -1) {
+            return null;
+        } else {
+            var removeValue = this.get(o);
+            list.remove(indexOfKeyInList);
+            this.size--;
+            return removeValue;
+        }
     }
 
     @Override
@@ -116,7 +149,9 @@ public class HashMapDYI<K,V> implements Map<K,V> {
 
     @Override
     public void clear() {
-
+        this.current_capacity = this.DEFAULT_CAPACITY;
+        this.initializeMap();
+        this.size = 0;
     }
 
     @Override
@@ -126,12 +161,18 @@ public class HashMapDYI<K,V> implements Map<K,V> {
 
     @Override
     public Collection<V> values() {
-        return null;
+        return this.entrySet()  .stream()
+                                .map(Map.Entry::getValue)
+                                .collect(Collectors.toList());
     }
 
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
-        return null;
+        Set<Map.Entry<K, V>> set = new HashSet<>();
+        Arrays.stream(this.buckets)
+                .filter(list -> !list.isEmpty())
+                .forEach(set::addAll);
+        return set;
     }
 
     @Override
@@ -140,8 +181,26 @@ public class HashMapDYI<K,V> implements Map<K,V> {
         return ""; // дописать
     }
 
+    // private methods
     private int findEntryIndex(final Object key) {
+        if (key == null) {
+            return -1;
+        }
         return key.hashCode() % this.current_capacity;
+    }
+
+    private int getIndexOfKeyInList(LinkedList<Entry<K,V>> list, Object o) {
+        int indexOfElementInList = -1;
+        var listIterator = list.listIterator();
+
+        while (listIterator.hasNext()) {
+            indexOfElementInList = listIterator.nextIndex();
+            var tmp = listIterator.next();
+            if (tmp.getKey().equals(o)) {
+                break;
+            }
+        }
+        return indexOfElementInList;
     }
 
     private void initializeMap() {

@@ -1,8 +1,5 @@
 package org.mityushov.DIYJavaCollections;
-// 16.04.21 tasks
-// 1) keySet()
-// 2) putAll()
-// 3) toString()
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -144,7 +141,7 @@ public class HashMapDYI<K,V> implements Map<K,V> {
 
     @Override
     public void putAll(Map<? extends K, ? extends V> map) {
-
+        map.forEach(this::put);
     }
 
     @Override
@@ -156,7 +153,9 @@ public class HashMapDYI<K,V> implements Map<K,V> {
 
     @Override
     public Set<K> keySet() {
-        return null;
+        return this.entrySet()  .stream()
+                                .map(Map.Entry::getKey)
+                                .collect(Collectors.toSet());
     }
 
     @Override
@@ -178,31 +177,43 @@ public class HashMapDYI<K,V> implements Map<K,V> {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        return ""; // дописать
+        this.forEach((key, value) -> builder.append("[").append(key).append(" : ").append(value).append("]\n"));
+        return builder.toString();
     }
-
-    // private methods
+    /**
+     * this private method returns bucket index using hashcode of the key
+     * @param key
+     * @return
+     */
     private int findEntryIndex(final Object key) {
         if (key == null) {
             return -1;
         }
         return key.hashCode() % this.current_capacity;
     }
-
+    /**
+     * this private method returns index of the key in the list, if present
+     * @param list
+     * @param o
+     * @return
+     */
     private int getIndexOfKeyInList(LinkedList<Entry<K,V>> list, Object o) {
         int indexOfElementInList = -1;
         var listIterator = list.listIterator();
 
         while (listIterator.hasNext()) {
-            indexOfElementInList = listIterator.nextIndex();
+            var tmpIndex = listIterator.nextIndex();
             var tmp = listIterator.next();
             if (tmp.getKey().equals(o)) {
+                indexOfElementInList = tmpIndex;
                 break;
             }
         }
         return indexOfElementInList;
     }
-
+    /**
+     * this private method creates new empty LinkedList in each bucket
+     */
     private void initializeMap() {
         this.buckets = new LinkedList[this.current_capacity];
 

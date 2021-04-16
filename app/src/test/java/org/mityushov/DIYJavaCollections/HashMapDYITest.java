@@ -5,12 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
 public class HashMapDYITest {
-    HashMapDYI<Integer, String> map = new HashMapDYI<>();
+    Map<Integer, String> map = new HashMapDYI<>();
     final String item1 = "Ignat Zelepopenko";
     final String item2 = "Vasiliy Strelnikov";
 
@@ -107,6 +108,22 @@ public class HashMapDYITest {
 
     @Test
     public void putAll() {
+        Map<Integer, String> hashMap = new HashMapDYI<>();
+        for (int i = 0; i < 10; i++) {
+            hashMap.put(i, String.valueOf(i));
+        }
+
+        this.map.putAll(hashMap);
+
+        assertFalse(this.map.isEmpty());
+        assertEquals(11, this.map.size());
+
+        assertEquals("0", this.map.get(0));
+        assertEquals(item2, this.map.get(17));
+
+        assertNull(this.map.get(11));
+        assertFalse(this.map.containsValue(item1));
+        assertTrue(this.map.containsValue(item2));
     }
 
     @Test
@@ -117,6 +134,16 @@ public class HashMapDYITest {
 
     @Test
     public void keySet() {
+        var keySet = this.map.keySet();
+        assertFalse(keySet.isEmpty());
+        var record = keySet.stream().map(Object::toString).collect(Collectors.joining(" "));
+        assertTrue(record.contains("1"));
+        assertTrue(record.contains("17"));
+        assertFalse(record.contains("21"));
+        assertFalse(record.contains("232"));
+        this.map.clear();
+        keySet = this.map.keySet();
+        assertTrue(keySet.isEmpty());
     }
 
     @Test
@@ -138,7 +165,6 @@ public class HashMapDYITest {
         // 1) set with items
         var entrySet = this.map.entrySet();
         assertFalse(entrySet.isEmpty());
-        entrySet.forEach(System.out :: println);
         var record = entrySet.stream().map(Object::toString).collect(Collectors.joining("\n"));
         assertTrue(record.contains("1"));
         assertTrue(record.contains("17"));
@@ -152,5 +178,13 @@ public class HashMapDYITest {
 
     @Test
     public void testToString() {
+        String record1 = "[" + 0 + " : " + item1 + "]\n" + "[" + 17 + " : " + item2 + "]\n";
+        String record2 = "[" + 17 + " : " + item2 + "]\n" + "[" + 0 + " : " + item1 + "]\n";
+        String record0 = "";
+        String string = this.map.toString();
+        assertTrue(record1.equals(string) || record2.equals(string));
+        this.map.clear();
+        string = this.map.toString();
+        assertEquals(record0, string);
     }
 }

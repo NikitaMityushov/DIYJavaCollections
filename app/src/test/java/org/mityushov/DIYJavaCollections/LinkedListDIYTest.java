@@ -4,6 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -81,14 +83,64 @@ public class LinkedListDIYTest {
 
     @Test
     public void containsAll() {
+        List<Integer> tmp = new ArrayList<>();
+        tmp.add(1);
+        tmp.add(4);
+        tmp.add(7);
+        
+        assertTrue(this.list.containsAll(tmp));
+        tmp.add(20);
+        assertFalse(this.list.containsAll(tmp));
+        tmp.remove((Object) 20);
+        assertTrue(this.list.containsAll(tmp));
+        this.list.clear();
+        assertFalse((this.list.containsAll(tmp)));
     }
 
     @Test
     public void addAll() {
+        int s = this.list.size();
+        List<Integer> tmp = new ArrayList<>();
+        tmp.add(1);
+        tmp.add(4);
+        tmp.add(7);
+
+        this.list.addAll(tmp);
+        assertEquals(s + 3, this.list.size());
+
+        List<Integer> tmp1 = new ArrayList<>();
+        tmp1.add(35);
+        tmp1.add(36);
+        tmp1.add(37);
+        this.list.addAll(tmp1);
+
+        assertEquals(s + 6, this.list.size());
+        assertTrue(this.list.containsAll(tmp));
+        assertEquals(Optional.of(37), Optional.ofNullable(this.list.get(this.list.size() - 1)));
+        assertEquals(Optional.of(36), Optional.ofNullable(this.list.get(this.list.size() - 2)));
+        assertEquals(Optional.of(35), Optional.ofNullable(this.list.get(this.list.size() - 3)));
+        assertEquals(Optional.of(7), Optional.ofNullable(this.list.get(this.list.size() - 4)));
+        assertEquals(Optional.of(4), Optional.ofNullable(this.list.get(this.list.size() - 5)));
+        assertEquals(Optional.of(1), Optional.ofNullable(this.list.get(this.list.size() - 6)));
     }
 
     @Test
-    public void testAddAll() {
+    public void AddAllFromIndex() {
+        int s = this.list.size();
+        List<Integer> tmp = new ArrayList<>();
+        tmp.add(1);
+        tmp.add(4);
+        tmp.add(7);
+
+        this.list.addAll(2, tmp);
+        assertEquals(s + 3, this.list.size());
+
+        assertEquals(Optional.of(1), Optional.ofNullable(this.list.get(2)));
+        assertEquals(Optional.of(4), Optional.ofNullable(this.list.get(3)));
+        assertEquals(Optional.of(7), Optional.ofNullable(this.list.get(4)));
+        assertEquals(Optional.of(2), Optional.ofNullable(this.list.get(5)));
+
+        this.list.forEach(System.out::println);
     }
 
     @Test

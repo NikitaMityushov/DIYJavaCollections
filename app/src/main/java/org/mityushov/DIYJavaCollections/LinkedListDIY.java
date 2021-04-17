@@ -16,7 +16,10 @@ public class LinkedListDIY<E> implements List<E> {
     private int size = 0;
     private Node<E> first;
     private Node<E> last;
-    
+    /**
+     *
+     * @param <E>
+     */
     private static class Node<E> {
         E item;
         Node<E> next;
@@ -33,7 +36,6 @@ public class LinkedListDIY<E> implements List<E> {
             return item.toString();
         }
     }
-    
 
     @Override
     public int size() {
@@ -60,12 +62,12 @@ public class LinkedListDIY<E> implements List<E> {
     public Iterator<E> iterator() {
         return new InternalIterator(this.first);
     }
-
+ // 1
     @Override
     public Object[] toArray() {
         return new Object[0];
     }
-
+// 2
     @Override
     public <T> T[] toArray(T[] ts) {
         return null;
@@ -82,7 +84,6 @@ public class LinkedListDIY<E> implements List<E> {
         this.size++;
         return true;
     }
-
     /**
      * remove first object o encountered in the list
      * @return boolean
@@ -94,24 +95,32 @@ public class LinkedListDIY<E> implements List<E> {
 
     @Override
     public boolean containsAll(Collection<?> collection) {
-        return false;
+        for (Object item : collection) {
+            if (!this.contains(item)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean addAll(Collection<? extends E> collection) {
-        return false;
+        collection.forEach(this::add);
+        return true;
     }
-
+// 5
     @Override
     public boolean addAll(int i, Collection<? extends E> collection) {
+        var iterator = this.listIterator(i);
+        collection.forEach(iterator::add);
         return false;
     }
-
+// 6
     @Override
     public boolean removeAll(Collection<?> collection) {
         return false;
     }
-
+// 7
     @Override
     public boolean retainAll(Collection<?> collection) {
         return false;
@@ -151,12 +160,12 @@ public class LinkedListDIY<E> implements List<E> {
         iterator.remove();
         return item;
     }
-
+// 8
     @Override
     public int indexOf(Object o) {
         return 0;
     }
-
+// 9
     @Override
     public int lastIndexOf(Object o) {
         return 0;
@@ -172,7 +181,7 @@ public class LinkedListDIY<E> implements List<E> {
         return new InternalListIterator(i) {
         };
     }
-
+// 10
     @Override
     public List<E> subList(int i, int i1) {
         return null;
@@ -326,7 +335,7 @@ public class LinkedListDIY<E> implements List<E> {
                 newItem = new Node<>(element, this.current, this.current.prev);
                 this.current.prev.next = this.current.prev = newItem;
             }
-            this.current = newItem;
+
             LinkedListDIY.this.size++;
         }
     }

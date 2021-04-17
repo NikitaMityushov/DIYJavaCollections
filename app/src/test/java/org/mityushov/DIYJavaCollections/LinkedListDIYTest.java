@@ -139,20 +139,49 @@ public class LinkedListDIYTest {
         assertEquals(Optional.of(4), Optional.ofNullable(this.list.get(3)));
         assertEquals(Optional.of(7), Optional.ofNullable(this.list.get(4)));
         assertEquals(Optional.of(2), Optional.ofNullable(this.list.get(5)));
-
-        this.list.forEach(System.out::println);
     }
 
     @Test
     public void removeAll() {
+        int s = this.list.size();
+        List<Integer> tmp = new ArrayList<>();
+        tmp.add(1);
+        tmp.add(4);
+        tmp.add(7);
+        tmp.add(20);
+
+        this.list.removeAll(tmp);
+        assertEquals(s - 3, this.list.size());
+
+        tmp.remove((Object) 20);
+
+        assertFalse(this.list.containsAll(tmp));
     }
 
     @Test
     public void retainAll() {
+        int s = this.list.size();
+        List<Integer> tmp = new ArrayList<>();
+        tmp.add(1);
+        tmp.add(4);
+        tmp.add(7);
+        tmp.add(20);
+
+        this.list.retainAll(tmp);
+        assertEquals(3, this.list.size());
+
+        tmp.remove((Object) 20);
+
+        assertTrue(this.list.containsAll(tmp));
+        assertFalse(this.list.contains(2));
+        assertFalse(this.list.contains(3));
+        assertFalse(this.list.contains(6));
     }
 
     @Test
     public void clear() {
+        this.list.clear();
+        assertTrue(this.list.isEmpty());
     }
 
     @Test
@@ -183,6 +212,9 @@ public class LinkedListDIYTest {
 
     @Test
     public void indexOf() {
+        for (int i = 0; i < this.list.size(); i++) {
+            assertEquals(i, this.list.indexOf(i));
+        }
     }
 
     @Test
@@ -193,7 +225,7 @@ public class LinkedListDIYTest {
     public void listIterator() {
         // iterator 1 with default constructor
         var iterator1 = this.list.listIterator();
-        assertEquals(1, iterator1.nextIndex());
+        assertEquals(0, iterator1.nextIndex());
         assertEquals(0, iterator1.previousIndex());
         assertFalse(iterator1.hasPrevious());
         assertTrue(iterator1.hasNext());

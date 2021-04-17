@@ -4,14 +4,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-
 /**
  * doubly linked list
  * implements List API
  * @param <E>
  * created by Mityushov Nikita
  */
-
 public class LinkedListDIY<E> implements List<E> {
     private int size = 0;
     private Node<E> first;
@@ -108,22 +106,23 @@ public class LinkedListDIY<E> implements List<E> {
         collection.forEach(this::add);
         return true;
     }
-// 5
+
     @Override
     public boolean addAll(int i, Collection<? extends E> collection) {
         var iterator = this.listIterator(i);
         collection.forEach(iterator::add);
         return false;
     }
-// 6
+
     @Override
     public boolean removeAll(Collection<?> collection) {
+        collection.forEach(this::remove);
         return false;
     }
-// 7
+
     @Override
     public boolean retainAll(Collection<?> collection) {
-        return false;
+        return this.removeIf(item -> !collection.contains(item));
     }
 
     @Override
@@ -163,7 +162,14 @@ public class LinkedListDIY<E> implements List<E> {
 // 8
     @Override
     public int indexOf(Object o) {
-        return 0;
+        ListIterator<E> iterator = this.listIterator();
+        while (iterator.hasNext()) {
+            var item = iterator.next();
+            if (item.equals(o)) {
+                return iterator.previousIndex();
+            }
+        }
+        return -1;
     }
 // 9
     @Override
@@ -186,12 +192,12 @@ public class LinkedListDIY<E> implements List<E> {
     public List<E> subList(int i, int i1) {
         return null;
     }
-
     /**
      * private class for iterator() method of Iterable interface
      */
     private class InternalIterator implements Iterator<E> {
         private Node<E> current;
+        private Node<E> prev; // for remove() method
 
         InternalIterator(final Node<E> first) {
             this.current = first;
@@ -205,17 +211,17 @@ public class LinkedListDIY<E> implements List<E> {
         @Override
         public E next() {
             var tmp = this.current.item;
+            this.prev = this.current;
             this.current = this.current.next;
             return tmp;
         }
-
         /**
          * @Override default void remove() method of Iterator
          * this method works only with remove(Object o) method
          */
         @Override
         public void remove() {
-            Node<E> tmp = this.current.prev;
+            var tmp = this.prev;
 
             if (tmp.prev == null) {
                 LinkedListDIY.this.removeFirst();
@@ -229,11 +235,9 @@ public class LinkedListDIY<E> implements List<E> {
             tmp.next.prev = tmp.prev;
             tmp.prev.next = tmp.next;
 
-            this.current = this.current.next;
             LinkedListDIY.this.size--;
         }
     }
-
     /**
      *
      */
@@ -289,7 +293,7 @@ public class LinkedListDIY<E> implements List<E> {
 
         @Override
         public int nextIndex() {
-            return this.hasNext() ? this.index + 1 : this.index;
+            return this.index;
         }
 
         @Override
@@ -341,15 +345,22 @@ public class LinkedListDIY<E> implements List<E> {
     }
 
     private void removeFirst() {
-        this.first = this.first.next;
-        this.first.prev = null;
-        this.size--;
+        if (this.size == 1) {
+            this.clear();
+        } else {
+            this.first = this.first.next;
+            this.first.prev = null;
+            this.size--;
+        }
     }
 
     private void removeLast() {
-        this.last = this.last.prev;
-        this.last.next = null;
-        this.size--;
+        if (this.size == 1) {
+            this.clear();
+        } else {
+            this.last = this.last.prev;
+            this.last.next = null;
+            this.size--;
+        }
     }
-
 }

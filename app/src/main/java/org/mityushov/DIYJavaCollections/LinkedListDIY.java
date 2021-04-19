@@ -1,5 +1,8 @@
 package org.mityushov.DIYJavaCollections;
-
+// 18.04.21
+// 1) lastIndexOf(Object)
+// 2) subList(int, int)
+// 3) toArray()
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -159,7 +162,7 @@ public class LinkedListDIY<E> implements List<E> {
         iterator.remove();
         return item;
     }
-// 8
+
     @Override
     public int indexOf(Object o) {
         ListIterator<E> iterator = this.listIterator();

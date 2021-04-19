@@ -25,7 +25,7 @@ public class HashMapDYI<K,V> implements Map<K,V> {
     }
     // static Entry class
     private static class Entry<K,V> implements Map.Entry<K,V> {
-        private K key;
+        private final K key;
         private V value;
 
         public Entry(final K key, final V value) {
